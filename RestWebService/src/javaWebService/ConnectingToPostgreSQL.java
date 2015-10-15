@@ -1,38 +1,65 @@
 package javaWebService;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ConnectingToPostgreSQL {
 
-	//if openConnection has an issue, see this: http://alvinalexander.com/java/jdbc-connection-string-mysql-postgresql-sqlserver
-	//actually just use syntax from the actual heroku site 
-    static String openConnection = "jdbc:postgresql://<ec2-54-227-253-238.compute-1.amazonaws.com>:<5432>/<d20hohh2uq3tib>?user=<lqwgfavqzszazx>&password=<dYfO-uBInG-WGgkqGFpz4GHAjc>&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"; 
+	//if openConnection has an issue, see this: http://alvinalexander.com/java/jdbc-connection-string-mysql-postgresql-sqlserver 
+	static String openConnection = "jdbc:postgresql://<ec2-54-227-253-238.compute-1.amazonaws.com>:<5432>/<d20hohh2uq3tib>?user=<lqwgfavqzszazx>&password=<dYfO-uBInG-WGgkqGFpz4GHAjc>&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory";     							
     private static String connectionAnswer; //seems like this should be elsewhere or is just a duplicate in general? static String connectionAnswer= "empty";  	
     
 
+    public String getAnswerSql (){
+        //execute(); >caused an error 
+        return connectionAnswer;
+    		}
     
+    private static Connection getConnection() throws URISyntaxException, SQLException {
+    //public String getSQLData() {
+        
+    try {
+		Class.forName("org.postgresql.Driver");
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} //Before you can connect to a database, you need to load the driver. This is one of the 2 standard ways
+    //heroku's recommendation for connecting to the database
+    URI dbUri = new URI(System.getenv(openConnection));
+
+    String username = dbUri.getUserInfo().split(":")[0];
+    String password = dbUri.getUserInfo().split(":")[1];
+    String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + dbUri.getPath();
+
+    return DriverManager.getConnection(dbUrl, username, password);
+    //end of heroku's code
+    //commenting out my way of connecting >> connection = DriverManager.getConnection(openConnection); //used to get a Connection instance from JDBC; global JDBC method
+    
+    }
     
     
     public String getSQLData() {
-    Connection connection = null;
-    Statement statement = null;
-    ResultSet result = null;
-    
+    	Connection connection = null;
+        Statement statement = null;
+        ResultSet result = null;
+    	
     try { 
-        Class.forName("org.postgresql.Driver"); //Before you can connect to a database, you need to load the driver. This is one of the 2 standard ways
-        connection = DriverManager.getConnection(openConnection); //used to get a Connection instance from JDBC; global JDBC method
-        statement = connection.createStatement(); //Any time you want to issue SQL statements to the database, you require a Statement or PreparedStatement instance.
-        String querySQL = "SELECT price* FROM ApartmentInventory"; //"SELECT attribute * FROM tableName WHERE condition", Example: “SELECT price FROM ApartmentListDatabaseTable WHERE price < 4000”
+    	statement = getConnection().createStatement();
+    	//connection = DriverManager.getConnection(openConnection); //used to get a Connection instance from JDBC; global JDBC method
+    	//statement = connection.createStatement(); //Any time you want to issue SQL statements to the database, you require a Statement or PreparedStatement instance.
+        String querySQL = "SELECT Price* FROM ApartmentInventory"; //"SELECT attribute * FROM tableName WHERE condition", Example: “SELECT price FROM ApartmentListDatabaseTable WHERE price < 4000”
         result = statement.executeQuery(querySQL); //result is an instance of ResultSet. once you issue your query it returns a ResultSet instance which contains the entire result
         //note that by default the Driver collects all the results for the query at once. You can make it fetch only a few rows however using cursors 
         connectionAnswer = "";
         while (result.next()) { //before reading any values you must call next() This returns true if there is a result, but more importantly, it prepares the row for processing.
-            int id = result.getInt("price");
-            connectionAnswer = connectionAnswer + id + " | " +  "\n";
-        } 
+            int id = result.getInt("Price");
+            connectionAnswer = connectionAnswer + id + " | " +  "\n";        
+        	}         
     } catch (Exception e) {
         e.printStackTrace();
         System.err.println(e.getMessage());
@@ -68,10 +95,5 @@ public class ConnectingToPostgreSQL {
     return null;  
     
     	}//should match up to end of this method
-    
-    public String getAnswerSql (){
-        //execute(); >caused an error 
-        return connectionAnswer;
-    		}
     
 }//end of ConnectingToPostgreSQL class    
