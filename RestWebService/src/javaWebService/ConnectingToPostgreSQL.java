@@ -52,7 +52,7 @@ public class ConnectingToPostgreSQL {
     	statement = getConnection().createStatement();
     	//connection = DriverManager.getConnection(openConnection); //used to get a Connection instance from JDBC; global JDBC method
     	//statement = connection.createStatement(); //Any time you want to issue SQL statements to the database, you require a Statement or PreparedStatement instance.
-        String querySQL = "SELECT Price* FROM ApartmentInventory"; //"SELECT attribute * FROM tableName WHERE condition", Example: “SELECT price FROM ApartmentListDatabaseTable WHERE price < 4000”
+        String querySQL = "SELECT Price* FROM apartmentinventory"; //"SELECT attribute * FROM tableName WHERE condition", Example: “SELECT price FROM ApartmentListDatabaseTable WHERE price < 4000”
         result = statement.executeQuery(querySQL); //result is an instance of ResultSet. once you issue your query it returns a ResultSet instance which contains the entire result
         //note that by default the Driver collects all the results for the query at once. You can make it fetch only a few rows however using cursors 
         connectionAnswer = "";
